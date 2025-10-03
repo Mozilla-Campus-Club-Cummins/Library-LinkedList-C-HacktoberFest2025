@@ -28,6 +28,10 @@ void displayBooks(Section* sec);
 int issueBook(Section* sec, int id);
 int returnBook(Section* sec, int id);
 int deleteBook(Section* sec, int id);
+Book* searchBookByID(Section* sec, int id);
+Book* searchBookByTitle(Section* sec, char title[]);
+Book* searchBookByAuthor(Section* sec, char author[]);
+
 Section* deleteSection(Section* head, char name[]);
 
 // --- Function Implementations ---
@@ -90,6 +94,37 @@ void displayBooks(Section* sec)
         temp = temp->next;
     }
 }
+
+// Search by ID
+Book* searchBookByID(Section* sec, int id) {
+    Book* temp = sec->books;
+    while(temp) {
+        if(temp->id == id) return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+// Search by Title (case-insensitive)
+Book* searchBookByTitle(Section* sec, char title[]) {
+    Book* temp = sec->books;
+    while(temp) {
+        if(strcasecmp(temp->title, title) == 0) return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+// Search by Author (case-insensitive)
+Book* searchBookByAuthor(Section* sec, char author[]) {
+    Book* temp = sec->books;
+    while(temp) {
+        if(strcasecmp(temp->author, author) == 0) return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
 
 int issueBook(Section* sec, int id) 
 {
@@ -172,7 +207,7 @@ int main() {
         printf("\n--- Library System Menu ---\n");
         printf("1. Add Section\n2. Delete Section\n3. Display Sections\n");
         printf("4. Add Book\n5. Delete Book\n6. Display Books in Section\n");
-        printf("7. Issue Book\n8. Return Book\n9. Exit\n");
+        printf("7. Issue Book\n8. Return Book\n9.Search Book 10. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
         getchar(); // consume newline
@@ -255,8 +290,54 @@ int main() {
                     else printf("Book not found or not issued.\n");
                 } else printf("Section not found.\n");
                 break;
-
             case 9:
+    printf("Enter Section Name: ");
+    fgets(secName, 50, stdin);
+    secName[strcspn(secName, "\n")] = 0;
+    sec = findSection(library, secName);
+
+    if(sec) {
+        int searchChoice;
+        printf("Search by:\n1. ID\n2. Title\n3. Author\nEnter choice: ");
+        scanf("%d", &searchChoice); getchar();
+
+        if(searchChoice == 1) {
+            printf("Enter Book ID: ");
+            scanf("%d", &id); getchar();
+            Book* found = searchBookByID(sec, id);
+            if(found) printf("Found: ID:%d | %s by %s | %s\n",
+                            found->id, found->title, found->author,
+                            found->isIssued ? "Issued" : "Available");
+            else printf("Book not found.\n");
+
+        } else if(searchChoice == 2) {
+            printf("Enter Book Title: ");
+            fgets(title, 50, stdin); title[strcspn(title,"\n")] = 0;
+            Book* found = searchBookByTitle(sec, title);
+            if(found) printf("Found: ID:%d | %s by %s | %s\n",
+                            found->id, found->title, found->author,
+                            found->isIssued ? "Issued" : "Available");
+            else printf("Book not found.\n");
+
+        } else if(searchChoice == 3) {
+            printf("Enter Author Name: ");
+            fgets(author, 50, stdin); author[strcspn(author,"\n")] = 0;
+            Book* found = searchBookByAuthor(sec, author);
+            if(found) printf("Found: ID:%d | %s by %s | %s\n",
+                            found->id, found->title, found->author,
+                            found->isIssued ? "Issued" : "Available");
+            else printf("Book not found.\n");
+
+        } else {
+            printf("Invalid search option!\n");
+        }
+
+    } else {
+        printf("Section not found.\n");
+    }
+    break;
+
+            case 10:
                 printf("Exiting...\n");
                 break;
 
