@@ -30,6 +30,7 @@ int returnBook(Section* sec, int id);
 int deleteBook(Section* sec, int id);
 Section* deleteSection(Section* head, char name[]);
 int login(char* role);
+void searchBookByName(Section* head, char name[]);
 
 // --- Function Implementations ---
 Section* addSection(Section* head, char name[]) {
@@ -134,7 +135,6 @@ Section* deleteSection(Section* head, char name[]) {
     Section* prev = NULL;
     while (temp) {
         if (strcmp(temp->name, name) == 0) {
-            // Free all books in section
             Book* b = temp->books;
             while (b) {
                 Book* next = b->next;
@@ -152,6 +152,27 @@ Section* deleteSection(Section* head, char name[]) {
         temp = temp->next;
     }
     return head;
+}
+
+// --- Search Book by Name ---
+void searchBookByName(Section* head, char name[]) {
+    Section* sec = head;
+    int found = 0;
+    while (sec) {
+        Book* b = sec->books;
+        while (b) {
+            if (strcmp(b->title, name) == 0) {
+                printf("\nBook Found!\nSection: %s\nID: %d\nTitle: %s\nAuthor: %s\nStatus: %s\n",
+                       sec->name, b->id, b->title, b->author,
+                       b->isIssued ? "Issued" : "Available");
+                found = 1;
+            }
+            b = b->next;
+        }
+        sec = sec->next;
+    }
+    if (!found)
+        printf("\nBook not found in the library.\n");
 }
 
 // --- User Login System ---
@@ -208,6 +229,7 @@ int main() {
         printf("1. Add Section (Admin)\n2. Delete Section (Admin)\n3. Display Sections\n");
         printf("4. Add Book (Admin)\n5. Delete Book (Admin)\n6. Display Books\n");
         printf("7. Issue Book (Student)\n8. Return Book (Student)\n9. Exit\n");
+        printf("10. Search Book by Name\n");
         printf("Enter choice: ");
         scanf("%d", &choice);
         getchar();
@@ -216,138 +238,71 @@ int main() {
 
         switch (choice) {
             case 1:
-                if (strcmp(role, "admin") != 0) {
-                    printf("Access denied! Admin only.\n");
-                    break;
-                }
-                printf("Enter Section Name: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
+                if (strcmp(role, "admin") != 0) { printf("Access denied!\n"); break; }
+                printf("Enter Section Name: "); fgets(secName, 50, stdin); secName[strcspn(secName,"\n")] = 0;
                 library = addSection(library, secName);
                 printf("Section added.\n");
                 break;
-
             case 2:
-                if (strcmp(role, "admin") != 0) {
-                    printf("Access denied! Admin only.\n");
-                    break;
-                }
-                printf("Enter Section Name to Delete: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
+                if (strcmp(role, "admin") != 0) { printf("Access denied!\n"); break; }
+                printf("Enter Section Name to Delete: "); fgets(secName, 50, stdin); secName[strcspn(secName,"\n")] = 0;
                 library = deleteSection(library, secName);
                 printf("Section deleted (if existed).\n");
                 break;
-
-            case 3:
-                displaySections(library);
-                break;
-
+            case 3: displaySections(library); break;
             case 4:
-                if (strcmp(role, "admin") != 0) {
-                    printf("Access denied! Admin only.\n");
-                    break;
-                }
-                printf("Enter Section Name: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
+                if (strcmp(role, "admin") != 0) { printf("Access denied!\n"); break; }
+                printf("Enter Section Name: "); fgets(secName, 50, stdin); secName[strcspn(secName,"\n")] = 0;
                 sec = findSection(library, secName);
                 if (sec) {
-                    printf("Enter Book ID: ");
-                    scanf("%d", &id);
-                    getchar();
-                    printf("Enter Book Title: ");
-                    fgets(title, 50, stdin);
-                    title[strcspn(title, "\n")] = 0;
-                    printf("Enter Author: ");
-                    fgets(author, 50, stdin);
-                    author[strcspn(author, "\n")] = 0;
+                    printf("Enter Book ID: "); scanf("%d", &id); getchar();
+                    printf("Enter Book Title: "); fgets(title, 50, stdin); title[strcspn(title,"\n")] = 0;
+                    printf("Enter Author: "); fgets(author, 50, stdin); author[strcspn(author,"\n")] = 0;
                     addBook(sec, id, title, author);
                     printf("Book added.\n");
-                } else {
-                    printf("Section not found.\n");
-                }
+                } else { printf("Section not found.\n"); }
                 break;
-
             case 5:
-                if (strcmp(role, "admin") != 0) {
-                    printf("Access denied! Admin only.\n");
-                    break;
-                }
-                printf("Enter Section Name: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
+                if (strcmp(role, "admin") != 0) { printf("Access denied!\n"); break; }
+                printf("Enter Section Name: "); fgets(secName, 50, stdin); secName[strcspn(secName,"\n")] = 0;
                 sec = findSection(library, secName);
-                if (sec) {
-                    printf("Enter Book ID to Delete: ");
-                    scanf("%d", &id);
-                    getchar();
-                    if (deleteBook(sec, id))
-                        printf("Book deleted.\n");
-                    else
-                        printf("Book not found.\n");
-                } else
-                    printf("Section not found.\n");
+                if (sec) { printf("Enter Book ID to Delete: "); scanf("%d",&id); getchar();
+                    if(deleteBook(sec,id)) printf("Book deleted.\n"); else printf("Book not found.\n");
+                } else printf("Section not found.\n");
                 break;
-
             case 6:
-                printf("Enter Section Name: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
-                sec = findSection(library, secName);
-                if (sec)
-                    displayBooks(sec);
-                else
-                    printf("Section not found.\n");
+                printf("Enter Section Name: "); fgets(secName,50,stdin); secName[strcspn(secName,"\n")]=0;
+                sec = findSection(library,secName);
+                if(sec) displayBooks(sec); else printf("Section not found.\n");
                 break;
-
             case 7:
-                printf("Enter Section Name: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
-                sec = findSection(library, secName);
-                if (sec) {
-                    printf("Enter Book ID to Issue: ");
-                    scanf("%d", &id);
-                    getchar();
-                    if (issueBook(sec, id))
-                        printf("Book issued successfully.\n");
-                    else
-                        printf("Book not found or already issued.\n");
-                } else
-                    printf("Section not found.\n");
+                printf("Enter Section Name: "); fgets(secName,50,stdin); secName[strcspn(secName,"\n")]=0;
+                sec = findSection(library,secName);
+                if(sec) { printf("Enter Book ID to Issue: "); scanf("%d",&id); getchar();
+                    if(issueBook(sec,id)) printf("Book issued successfully.\n");
+                    else printf("Book not found or already issued.\n");
+                } else printf("Section not found.\n");
                 break;
-
             case 8:
-                printf("Enter Section Name: ");
-                fgets(secName, 50, stdin);
-                secName[strcspn(secName, "\n")] = 0;
-                sec = findSection(library, secName);
-                if (sec) {
-                    printf("Enter Book ID to Return: ");
-                    scanf("%d", &id);
-                    getchar();
-                    if (returnBook(sec, id))
-                        printf("Book returned successfully.\n");
-                    else
-                        printf("Book not found or not issued.\n");
-                } else
-                    printf("Section not found.\n");
+                printf("Enter Section Name: "); fgets(secName,50,stdin); secName[strcspn(secName,"\n")]=0;
+                sec = findSection(library,secName);
+                if(sec) { printf("Enter Book ID to Return: "); scanf("%d",&id); getchar();
+                    if(returnBook(sec,id)) printf("Book returned successfully.\n");
+                    else printf("Book not found or not issued.\n");
+                } else printf("Section not found.\n");
                 break;
-
-            case 9:
-                printf("Exiting system...\n");
+            case 9: printf("Exiting system...\n"); break;
+            case 10:
+                printf("Enter Book Name to Search: "); fgets(title,50,stdin); title[strcspn(title,"\n")]=0;
+                searchBookByName(library,title);
                 break;
-
-            default:
-                printf("Invalid choice!\n");
+            default: printf("Invalid choice!\n");
         }
 
-    } while (choice != 9);
+    } while(choice != 9);
 
     // Free memory
-    while (library)
-        library = deleteSection(library, library->name);
+    while(library) library = deleteSection(library, library->name);
 
     return 0;
 }
